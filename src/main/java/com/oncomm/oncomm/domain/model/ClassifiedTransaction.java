@@ -41,7 +41,7 @@ public class ClassifiedTransaction {
 
     private LocalDateTime classifiedAt;
 
-    public static ClassifiedTransaction from(Transaction tx, MerchantKeyword mk) {
+    public static ClassifiedTransaction from(Transaction tx, ClassificationKeyword mk) {
         return ClassifiedTransaction.builder()
                 .transaction(tx)
                 .company(mk.getCompany())
@@ -52,5 +52,24 @@ public class ClassifiedTransaction {
                 .classifiedAt(LocalDateTime.now())
                 .build();
     }
+
+
+    public LocalDateTime getOccurredAt() {
+        return this.transaction.getOccurredAt();
+    }
+
+    public String getDescription() {
+        return this.transaction.getDescription();
+    }
+
+    public long getDeposit() {
+        return this.transaction.getDeposit();
+    }
+
+    public long getWithdraw() {
+        return this.transaction.getWithdraw();
+    }
+
+
 }
 

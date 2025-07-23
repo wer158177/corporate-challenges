@@ -5,7 +5,6 @@ import com.oncomm.oncomm.application.TransactionQueryApplicationService;
 import com.oncomm.oncomm.dto.response.AccountingSummary;
 import com.oncomm.oncomm.dto.response.ClassifiedTransactionResponse;
 import com.oncomm.oncomm.dto.response.UnclassifiedTransactionResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,11 +13,15 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/accounting")
-@RequiredArgsConstructor
 public class AccountingController {
 
     private final AccountingApplicationService accountingUseCase;
     private final TransactionQueryApplicationService queryService;
+
+    public AccountingController(AccountingApplicationService accountingUseCase, TransactionQueryApplicationService queryService) {
+        this.accountingUseCase = accountingUseCase;
+        this.queryService = queryService;
+    }
 
 
     @PostMapping("/process")
@@ -56,6 +59,8 @@ public class AccountingController {
             @RequestParam String companyId) {
         return ResponseEntity.ok(queryService.getUnclassifiedTransactions(companyId));
     }
+
+
 
 }
 

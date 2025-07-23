@@ -19,20 +19,20 @@ public class TransactionClassifierService {
     private final MerchantKeywordRepository merchantKeywordRepository;
 
     public ClassificationResult classify(List<Transaction> transactions) {
-        List<MerchantKeyword> allKeywords = merchantKeywordRepository.findAllWithJoins();
+        List<ClassificationKeyword> allKeywords = merchantKeywordRepository.findAllWithJoins();
         List<ClassifiedTransaction> classifiedList = new ArrayList<>();
         List<UnclassifiedTransaction> unclassifiedList = new ArrayList<>();
 
         for (Transaction tx : transactions) {
-            Optional<MerchantKeyword> match = allKeywords.stream()
+            Optional<ClassificationKeyword> match = allKeywords.stream()
                     .filter(mk -> tx.getDescription().contains(mk.getKeyword()))
                     .findFirst();
 
             if (match.isPresent()) {
-                MerchantKeyword mk = match.get();
+                ClassificationKeyword mk = match.get();
                 classifiedList.add(ClassifiedTransaction.from(tx, mk));
             } else {
-                Company company = tx.getCompany(); // ← 이게 가능해야 함
+                Company company = tx.getCompany();
                 unclassifiedList.add(UnclassifiedTransaction.from(tx, company));
             }
         }

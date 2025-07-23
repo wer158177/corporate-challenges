@@ -2,25 +2,29 @@ package com.oncomm.oncomm.domain.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oncomm.oncomm.domain.model.Category;
+import com.oncomm.oncomm.domain.model.ClassificationKeyword;
 import com.oncomm.oncomm.domain.model.Company;
-import com.oncomm.oncomm.domain.model.MerchantKeyword;
-import com.oncomm.oncomm.infrastructure.repository.*;
+import com.oncomm.oncomm.infrastructure.repository.CategoryRepository;
+import com.oncomm.oncomm.infrastructure.repository.CompanyRepository;
+import com.oncomm.oncomm.infrastructure.repository.MerchantKeywordRepository;
 import com.oncomm.oncomm.support.CompanyRule;
 import com.oncomm.oncomm.support.Rule;
 import com.oncomm.oncomm.support.RuleFile;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
+
 public class RuleIngestService {
 
     private final ObjectMapper objectMapper;
@@ -28,22 +32,34 @@ public class RuleIngestService {
     private final CategoryRepository categoryRepository;
     private final MerchantKeywordRepository merchantKeywordRepository;
 
+    public RuleIngestService(ObjectMapper objectMapper, CompanyRepository companyRepository, CategoryRepository categoryRepository, MerchantKeywordRepository merchantKeywordRepository) {
+        this.objectMapper = objectMapper;
+        this.companyRepository = companyRepository;
+        this.categoryRepository = categoryRepository;
+        this.merchantKeywordRepository = merchantKeywordRepository;
+    }
+
     @Transactional
     public void saveRules(MultipartFile jsonFile) {
         try {
             RuleFile ruleFile = objectMapper.readValue(jsonFile.getInputStream(), RuleFile.class);
 
+            Map<String, Company> companyCache = new HashMap<>();
+            Map<String, Category> categoryCache = new HashMap<>();
+
             for (CompanyRule companyRule : ruleFile.getCompanies()) {
                 String companyId = companyRule.getCompanyId();
                 String companyName = companyRule.getCompanyName();
 
-                Company company = companyRepository.findById(companyId).orElseGet(() ->
-                        companyRepository.save(
-                                Company.builder()
-                                        .companyId(companyId)
-                                        .companyName(companyName)
-                                        .createdAt(LocalDateTime.now())
-                                        .build()
+                Company company = companyCache.computeIfAbsent(companyId, id ->
+                        companyRepository.findById(id).orElseGet(() ->
+                                companyRepository.save(
+                                        Company.builder()
+                                                .companyId(companyId)
+                                                .companyName(companyName)
+                                                .createdAt(LocalDateTime.now())
+                                                .build()
+                                )
                         )
                 );
 
@@ -51,28 +67,38 @@ public class RuleIngestService {
                     String categoryId = rule.getCategoryId();
                     String categoryName = rule.getCategoryName();
 
-                    Category category = categoryRepository.findById(categoryId).orElseGet(() ->
-                            categoryRepository.save(
-                                    Category.builder()
-                                            .categoryId(categoryId)
-                                            .categoryName(categoryName)
-                                            .company(company)
-                                            .createdAt(LocalDateTime.now())
-                                            .build()
+                    String categoryKey = companyId + ":" + categoryId;
+                    Category category = categoryCache.computeIfAbsent(categoryKey, key ->
+                            categoryRepository.findById(categoryId).orElseGet(() ->
+                                    categoryRepository.save(
+                                            Category.builder()
+                                                    .categoryId(categoryId)
+                                                    .categoryName(categoryName)
+                                                    .company(company)
+                                                    .createdAt(LocalDateTime.now())
+                                                    .build()
+                                    )
                             )
                     );
 
-                    if (rule.getKeywords() != null) {
+                    if (rule.getKeywords() != null && !rule.getKeywords().isEmpty()) {
+                        Set<String> existingKeywords = merchantKeywordRepository
+                                .findAllByCompanyAndCategory(company, category)
+                                .stream()
+                                .map(ClassificationKeyword::getKeyword)
+                                .collect(Collectors.toSet());
+
                         for (String keyword : rule.getKeywords()) {
-                            merchantKeywordRepository.findByCompanyAndCategoryAndKeyword(company, category, keyword)
-                                    .orElseGet(() -> merchantKeywordRepository.save(
-                                            MerchantKeyword.builder()
-                                                    .company(company)
-                                                    .category(category)
-                                                    .keyword(keyword)
-                                                    .createdAt(LocalDateTime.now())
-                                                    .build()
-                                    ));
+                            if (!existingKeywords.contains(keyword)) {
+                                merchantKeywordRepository.save(
+                                        ClassificationKeyword.builder()
+                                                .company(company)
+                                                .category(category)
+                                                .keyword(keyword)
+                                                .createdAt(LocalDateTime.now())
+                                                .build()
+                                );
+                            }
                         }
                     }
                 }

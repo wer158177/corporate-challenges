@@ -5,6 +5,9 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+/**
+ * 거래 원본 엔티티
+ */
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -14,19 +17,23 @@ public class Transaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long txId;
+    private Long id; // 거래 ID
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id")
-    private Company company;
-    private LocalDateTime txDatetime;
-    private String description;
-    private Long deposit;
-    private Long withdraw;
-    private Long balance;
-    private String branchInfo;
-    private LocalDateTime createdAt;
+    private Company company; // 회사
 
+    private LocalDateTime occurredAt; // 거래 발생 일시
 
+    private String description; // 거래 설명
 
+    private Long deposit; // 입금액
 
+    private Long withdraw; // 출금액
+
+    private Long balance; // 거래 후 잔액
+
+    private String branchInfo; // 거래 지점 정보
+
+    private LocalDateTime createdAt; // 생성 시각
 }

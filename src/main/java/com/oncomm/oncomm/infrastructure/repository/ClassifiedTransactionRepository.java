@@ -21,7 +21,7 @@ public interface ClassifiedTransactionRepository extends JpaRepository<Classifie
     @Query("SELECT ct FROM ClassifiedTransaction ct " +
             "JOIN FETCH ct.company " +
             "JOIN FETCH ct.category " +
-            "JOIN FETCH ct.transaction " +  // ✅ 수정
+            "JOIN FETCH ct.transaction " +
             "WHERE ct.company.companyId = :companyId " +
             "ORDER BY ct.classifiedAt DESC")
     List<ClassifiedTransaction> findAllWithJoinsByCompanyId(@Param("companyId") String companyId);
@@ -37,6 +37,22 @@ public interface ClassifiedTransactionRepository extends JpaRepository<Classifie
             "WHERE ct.company.companyId = :companyId " +
             "GROUP BY ct.category.categoryId, ct.categoryName")
     List<AccountingSummary> getAccountingSummary(@Param("companyId") String companyId);
+
+
+    @Query("""
+    SELECT CASE WHEN COUNT(ct) > 0 THEN true ELSE false END
+    FROM ClassifiedTransaction ct
+    WHERE ct.transaction.occurredAt = :occurredAt
+      AND ct.transaction.description = :description
+      AND ct.transaction.deposit = :deposit
+      AND ct.transaction.withdraw = :withdraw
+""")
+    boolean existsByTransactionFields(
+            @Param("occurredAt") java.time.LocalDateTime occurredAt,
+            @Param("description") String description,
+            @Param("deposit") long deposit,
+            @Param("withdraw") long withdraw
+    );
 }
 
 

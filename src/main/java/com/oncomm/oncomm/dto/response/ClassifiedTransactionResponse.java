@@ -4,35 +4,35 @@ import com.oncomm.oncomm.domain.model.ClassifiedTransaction;
 import com.oncomm.oncomm.domain.model.Transaction;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Value;
 
 @Getter
 @Builder
 public class ClassifiedTransactionResponse {
 
-    private String transactionDateTime;
+    private String occurredAt;
     private String description;
-    private Long income;
-    private Long expenditure;
+    private Long deposit;
+    private Long withdraw;
     private CategoryDTO category;
 
-    @Value
+    @Getter
+    @Builder
     public static class CategoryDTO {
-        String id;
-        String name;
+        private String id;
+        private String name;
     }
 
-    public static ClassifiedTransactionResponse fromEntity(ClassifiedTransaction tx) {
+    public static ClassifiedTransactionResponse from(ClassifiedTransaction tx) {
         Transaction origin = tx.getTransaction();
         return ClassifiedTransactionResponse.builder()
-                .transactionDateTime(origin.getTxDatetime().toString())
+                .occurredAt(origin.getOccurredAt().toString())
                 .description(origin.getDescription())
-                .income(origin.getDeposit())
-                .expenditure(origin.getWithdraw())
-                .category(new CategoryDTO(
-                        tx.getCategory().getCategoryId(),
-                        tx.getCategoryName()
-                ))
+                .deposit(origin.getDeposit())
+                .withdraw(origin.getWithdraw())
+                .category(CategoryDTO.builder()
+                        .id(tx.getCategory().getCategoryId())
+                        .name(tx.getCategoryName())
+                        .build())
                 .build();
     }
 }

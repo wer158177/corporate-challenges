@@ -2,6 +2,10 @@ spring:
   application:
     name: accounting-classifier
 
+  web:
+    resources:
+      static-locations: classpath:/static/
+
   datasource:
     url: jdbc:postgresql://localhost:5432/oncomm
     username: postgres

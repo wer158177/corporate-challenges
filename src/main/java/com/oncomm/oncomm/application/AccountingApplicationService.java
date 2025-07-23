@@ -1,26 +1,33 @@
 
 package com.oncomm.oncomm.application;
 
-import com.oncomm.oncomm.domain.model.*;
-import com.oncomm.oncomm.domain.service.*;
-import com.oncomm.oncomm.dto.response.ClassifiedTransactionResponse;
+import com.oncomm.oncomm.domain.model.Transaction;
+import com.oncomm.oncomm.domain.service.CsvParserService;
+import com.oncomm.oncomm.domain.service.RuleIngestService;
+import com.oncomm.oncomm.domain.service.TransactionClassifierService;
+import com.oncomm.oncomm.domain.service.TransactionPersistenceService;
 import com.oncomm.oncomm.util.ClassificationResult;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
+
 public class AccountingApplicationService {
 
     private final RuleIngestService ruleIngestService;
     private final CsvParserService csvParserService;
     private final TransactionClassifierService classifierService;
     private final TransactionPersistenceService persistenceService;
-    private final QueryTransactionService queryTransactionService;
+
+    public AccountingApplicationService(RuleIngestService ruleIngestService, CsvParserService csvParserService, TransactionClassifierService classifierService, TransactionPersistenceService persistenceService) {
+        this.ruleIngestService = ruleIngestService;
+        this.csvParserService = csvParserService;
+        this.classifierService = classifierService;
+        this.persistenceService = persistenceService;
+    }
 
 
     @Transactional
@@ -32,9 +39,6 @@ public class AccountingApplicationService {
     }
 
 
-    public List<ClassifiedTransactionResponse> getClassifiedTransactions(String companyId) {
-        return queryTransactionService.getClassifiedTransactions(companyId);
-    }
 
 
 
