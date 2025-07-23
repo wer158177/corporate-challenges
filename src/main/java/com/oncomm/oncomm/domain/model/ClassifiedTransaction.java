@@ -13,7 +13,13 @@ import java.time.LocalDateTime;
 public class ClassifiedTransaction {
 
     @Id
-    private Long txId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "classified_tx_id")
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tx_id")
+    private Transaction transaction;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id")
@@ -33,4 +39,17 @@ public class ClassifiedTransaction {
     private String matchedKeyword;
 
     private LocalDateTime classifiedAt;
+
+    public static ClassifiedTransaction from(Transaction tx, MerchantKeyword mk) {
+        return ClassifiedTransaction.builder()
+                .transaction(tx)
+                .company(mk.getCompany())
+                .companyName(mk.getCompany().getCompanyName())
+                .category(mk.getCategory())
+                .categoryName(mk.getCategory().getCategoryName())
+                .matchedKeyword(mk.getKeyword())
+                .classifiedAt(LocalDateTime.now())
+                .build();
+    }
 }
+

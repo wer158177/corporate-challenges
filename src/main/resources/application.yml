@@ -3,14 +3,14 @@ spring:
     name: accounting-classifier
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/accounting_db
+    url: jdbc:postgresql://localhost:5432/oncomm
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
-      ddl-auto: update # 운영 시에는 validate / none 권장
+      ddl-auto: create-drop # 운영 시에는 validate / none 권장
     properties:
       hibernate:
         format_sql: true
@@ -53,5 +53,5 @@ logging:
 # 서버 기본 포트
 server:
   port: 8080
-  servlet:
-    context-path: /api/v1
+
+

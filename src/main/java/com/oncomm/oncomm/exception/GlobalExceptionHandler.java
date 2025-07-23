@@ -32,6 +32,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleOther(Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("알 수 없는 오류 발생: " + ex.getMessage());
+        ex.printStackTrace(); // 또는 Logger 사용
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("알 수 없는 오류 발생: " + ex.getClass().getSimpleName() + " - " + ex.getMessage());
     }
 }

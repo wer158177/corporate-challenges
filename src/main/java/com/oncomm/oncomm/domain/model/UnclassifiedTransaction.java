@@ -3,8 +3,6 @@ package com.oncomm.oncomm.domain.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -13,11 +11,25 @@ import java.time.LocalDateTime;
 public class UnclassifiedTransaction {
 
     @Id
-    private Long txId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Column(columnDefinition = "TEXT")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tx_id")
+    private Transaction transaction;
+
+    @Column(nullable = false)
     private String reason;
 
-    private Boolean reviewed;
-    private LocalDateTime reviewedAt;
+    @Column(nullable = false)
+    private boolean reviewed;
+
+    // ✅ 여기에 정적 팩토리 메서드 추가!
+    public static UnclassifiedTransaction from(Transaction tx) {
+        return UnclassifiedTransaction.builder()
+                .transaction(tx)
+                .reason("키워드 미일치")
+                .reviewed(false)
+                .build();
+    }
 }
