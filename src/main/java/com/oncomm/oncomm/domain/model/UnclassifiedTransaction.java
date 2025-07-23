@@ -18,16 +18,20 @@ public class UnclassifiedTransaction {
     @JoinColumn(name = "tx_id")
     private Transaction transaction;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
+    private Company company;  // 회사 정보 추가
+
     @Column(nullable = false)
     private String reason;
 
     @Column(nullable = false)
     private boolean reviewed;
 
-    // ✅ 여기에 정적 팩토리 메서드 추가!
-    public static UnclassifiedTransaction from(Transaction tx) {
+    public static UnclassifiedTransaction from(Transaction tx, Company company) {
         return UnclassifiedTransaction.builder()
                 .transaction(tx)
+                .company(company)
                 .reason("키워드 미일치")
                 .reviewed(false)
                 .build();

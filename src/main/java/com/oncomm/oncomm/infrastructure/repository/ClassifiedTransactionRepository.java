@@ -1,6 +1,7 @@
 package com.oncomm.oncomm.infrastructure.repository;
 
 import com.oncomm.oncomm.domain.model.ClassifiedTransaction;
+import com.oncomm.oncomm.dto.response.AccountingSummary;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -27,4 +28,15 @@ public interface ClassifiedTransactionRepository extends JpaRepository<Classifie
 
 
 
+
+    @Query("SELECT new com.oncomm.oncomm.dto.response.AccountingSummary(" +
+            "ct.category.categoryId, ct.categoryName, " +
+            "SUM(t.deposit), SUM(t.withdraw)) " +
+            "FROM ClassifiedTransaction ct " +
+            "JOIN ct.transaction t " +
+            "WHERE ct.company.companyId = :companyId " +
+            "GROUP BY ct.category.categoryId, ct.categoryName")
+    List<AccountingSummary> getAccountingSummary(@Param("companyId") String companyId);
 }
+
+

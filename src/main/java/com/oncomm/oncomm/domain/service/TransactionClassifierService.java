@@ -32,7 +32,8 @@ public class TransactionClassifierService {
                 MerchantKeyword mk = match.get();
                 classifiedList.add(ClassifiedTransaction.from(tx, mk));
             } else {
-                unclassifiedList.add(UnclassifiedTransaction.from(tx));
+                Company company = tx.getCompany(); // ← 이게 가능해야 함
+                unclassifiedList.add(UnclassifiedTransaction.from(tx, company));
             }
         }
 

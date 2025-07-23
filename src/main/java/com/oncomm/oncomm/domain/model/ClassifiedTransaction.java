@@ -15,11 +15,12 @@ public class ClassifiedTransaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "classified_tx_id")
-    private Long id;
+    private Long classifiedTxId; // id → classifiedTxId로 변경
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)  // ManyToOne → OneToOne으로 변경
     @JoinColumn(name = "tx_id")
     private Transaction transaction;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id")

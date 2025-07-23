@@ -4,6 +4,7 @@ import com.oncomm.oncomm.domain.model.ClassifiedTransaction;
 import com.oncomm.oncomm.domain.model.Transaction;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Value;
 
 @Getter
 @Builder
@@ -13,8 +14,13 @@ public class ClassifiedTransactionResponse {
     private String description;
     private Long income;
     private Long expenditure;
-    private String categoryId;
-    private String categoryName;
+    private CategoryDTO category;
+
+    @Value
+    public static class CategoryDTO {
+        String id;
+        String name;
+    }
 
     public static ClassifiedTransactionResponse fromEntity(ClassifiedTransaction tx) {
         Transaction origin = tx.getTransaction();
@@ -23,9 +29,10 @@ public class ClassifiedTransactionResponse {
                 .description(origin.getDescription())
                 .income(origin.getDeposit())
                 .expenditure(origin.getWithdraw())
-                .categoryId(tx.getCategory().getCategoryId())
-                .categoryName(tx.getCategoryName())
+                .category(new CategoryDTO(
+                        tx.getCategory().getCategoryId(),
+                        tx.getCategoryName()
+                ))
                 .build();
     }
-
 }

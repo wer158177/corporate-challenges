@@ -15,7 +15,9 @@ public class Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long txId;
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
+    private Company company;
     private LocalDateTime txDatetime;
     private String description;
     private Long deposit;
@@ -23,4 +25,8 @@ public class Transaction {
     private Long balance;
     private String branchInfo;
     private LocalDateTime createdAt;
+
+
+
+
 }
