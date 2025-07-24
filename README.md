@@ -194,21 +194,6 @@ curl "http://localhost:8080/api/v1/accounting/summary/categories/com_1" | jq
 
 ---
 
-## 🧪 테스트 실행
-
-### API 테스트
-```bash
-# 컨테이너 내부에서 테스트 실행
-docker-compose exec app ./gradlew test
-
-# 로컬 환경에서 테스트 실행
-./gradlew test
-
-# 테스트 커버리지 확인
-./gradlew jacocoTestReport
-open build/reports/jacoco/test/html/index.html
-```
-
 ### 수동 API 테스트 시나리오
 
 #### 1. 기본 플로우 테스트
