@@ -47,33 +47,33 @@ class TransactionClassifierServiceTest {
                 .build();
     }
 
-    private Transaction buildTx(String description, Company company) {
+    private Transaction buildTx(String description) {
         return Transaction.builder()
                 .id(1L)
                 .description(description)
-                .company(company)
                 .occurredAt(LocalDateTime.now())
                 .build();
     }
 
+
     @Test
     void classify_회사정보없음() {
-        // given
-        Transaction tx = buildTx("쿠팡 주문", null);
+        // given: 회사 정보 없이 키워드만 포함
+        Transaction tx = buildTx("쿠팡 주문");
         when(merchantKeywordRepository.findAllWithJoins()).thenReturn(List.of(keyword1));
 
         // when
         ClassificationResult result = transactionClassifierService.classify(List.of(tx));
 
         // then
-        assertThat(result.classified()).isEmpty();
-        assertThat(result.unclassified()).hasSize(1);
-        assertThat(result.unclassified().get(0).getReason()).contains("회사 정보 없음");
+        assertThat(result.classified()).hasSize(1); // ✅ 이전에는 0
+        assertThat(result.unclassified()).isEmpty();
     }
+
 
     @Test
     void classify_설명없음() {
-        Transaction tx = buildTx(" ", sampleCompany);
+        Transaction tx = buildTx(" "); // company 제거
         when(merchantKeywordRepository.findAllWithJoins()).thenReturn(List.of(keyword1));
 
         ClassificationResult result = transactionClassifierService.classify(List.of(tx));
@@ -85,18 +85,22 @@ class TransactionClassifierServiceTest {
 
     @Test
     void classify_키워드매칭성공() {
-        Transaction tx = buildTx("쿠팡 온라인몰 결제", sampleCompany);
+        Transaction tx = buildTx("쿠팡 온라인몰 결제"); // company 제거
         when(merchantKeywordRepository.findAllWithJoins()).thenReturn(List.of(keyword1));
 
         ClassificationResult result = transactionClassifierService.classify(List.of(tx));
 
         assertThat(result.classified()).hasSize(1);
+        ClassifiedTransaction ct = result.classified().get(0);
+        assertThat(ct.getCompany()).isEqualTo(keyword1.getCompany());
+        assertThat(ct.getCategory()).isEqualTo(keyword1.getCategory());
+
         assertThat(result.unclassified()).isEmpty();
     }
 
     @Test
     void classify_키워드매칭실패() {
-        Transaction tx = buildTx("배달의민족 주문", sampleCompany);
+        Transaction tx = buildTx("배달의민족 주문"); // company 제거
         when(merchantKeywordRepository.findAllWithJoins()).thenReturn(List.of(keyword1));
 
         ClassificationResult result = transactionClassifierService.classify(List.of(tx));
@@ -108,11 +112,11 @@ class TransactionClassifierServiceTest {
 
     @Test
     void classify_여러건혼합처리() {
-        Transaction tx1 = buildTx("쿠팡 결제", sampleCompany);               // 매칭
-        Transaction tx2 = buildTx("배달의민족", sampleCompany);            // 미일치
-        Transaction tx3 = buildTx(" ", sampleCompany);                    // 설명 누락
-        Transaction tx4 = buildTx("네이버 쇼핑", sampleCompany);          // 매칭
-        Transaction tx5 = buildTx("카카오페이", null);                    // 회사 없음
+        Transaction tx1 = buildTx("쿠팡 결제");
+        Transaction tx2 = buildTx("배달의민족");
+        Transaction tx3 = buildTx(" ");
+        Transaction tx4 = buildTx("네이버 쇼핑");
+        Transaction tx5 = buildTx("카카오페이");
 
         when(merchantKeywordRepository.findAllWithJoins()).thenReturn(List.of(keyword1, keyword2));
 
@@ -120,5 +124,8 @@ class TransactionClassifierServiceTest {
 
         assertThat(result.classified()).hasSize(2); // tx1, tx4
         assertThat(result.unclassified()).hasSize(3); // tx2, tx3, tx5
+
+        assertThat(result.unclassified().get(0).getReason()).isIn("키워드 미일치", "설명 누락");
     }
+
 }

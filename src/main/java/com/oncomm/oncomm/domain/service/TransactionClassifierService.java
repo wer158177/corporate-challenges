@@ -24,19 +24,28 @@ public class TransactionClassifierService {
         List<UnclassifiedTransaction> unclassifiedList = new ArrayList<>();
 
         for (Transaction tx : transactions) {
+            String description = tx.getDescription();
+
+            // 설명 누락
+            if (description == null || description.trim().isEmpty()) {
+                unclassifiedList.add(UnclassifiedTransaction.from(tx, null, "설명 누락"));
+                continue;
+            }
+
+            // 키워드 기반 매칭 (회사 없이)
             Optional<ClassificationKeyword> match = allKeywords.stream()
-                    .filter(mk -> tx.getDescription().contains(mk.getKeyword()))
+                    .filter(kw -> description.contains(kw.getKeyword()))
                     .findFirst();
 
             if (match.isPresent()) {
-                ClassificationKeyword mk = match.get();
-                classifiedList.add(ClassifiedTransaction.from(tx, mk));
+                classifiedList.add(ClassifiedTransaction.from(tx, match.get()));
             } else {
-                Company company = tx.getCompany();
-                unclassifiedList.add(UnclassifiedTransaction.from(tx, company));
+                unclassifiedList.add(UnclassifiedTransaction.from(tx, null, "키워드 미일치"));
             }
         }
 
         return new ClassificationResult(classifiedList, unclassifiedList);
     }
+
+
 }
