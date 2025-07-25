@@ -2,6 +2,12 @@
 
 은행 거래 내역 CSV 파일을 업로드하여 미리 정의된 분류 규칙에 따라 자동으로 회계 카테고리를 분류하는 시스템입니다.
 
+
+
+
+
+<img width="1084" height="1203" alt="image" src="https://github.com/user-attachments/assets/21f5dc6c-4cf9-490a-b242-d6218b106eb2" />
+
 ## 실행 방법
 
 ### 사전 요구사항
