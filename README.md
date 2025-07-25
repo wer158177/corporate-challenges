@@ -370,12 +370,5 @@ volumes:
 
 ---
 
-## 🛠 기술 스택
 
-- **Backend**: Spring Boot 3.x, Java 17, PostgreSQL
-- **Frontend**: Next.js 14, TypeScript, Tailwind CSS
-- **Build**: Gradle
-- **Test**: JUnit 5, MockMVC
-
----
 
